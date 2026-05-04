@@ -9,7 +9,7 @@ import { Button } from "./ui/Button";
  * Main layout wrapper with sidebar, header, and content area
  */
 export function Layout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -40,6 +40,7 @@ export function Layout({ children }) {
 
   const containerStyle = {
     display: "flex",
+    width: "100%",
     height: "100vh",
     backgroundColor: theme.colors.background,
     fontFamily: theme.typography.fontFamily.base,
@@ -71,6 +72,7 @@ export function Layout({ children }) {
     display: "flex",
     flexDirection: "column",
     height: "100vh",
+    backgroundColor: theme.colors.background,
     transition: `margin-left ${theme.transitions.duration.base} ${theme.transitions.timing.easeInOut}`,
 
     // Mobile responsiveness
@@ -85,49 +87,102 @@ export function Layout({ children }) {
     borderBottom: `1px solid ${theme.colors.border}`,
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingLeft: theme.spacing[4],
-    paddingRight: theme.spacing[4],
+    justifyContent: "center",
     boxShadow: theme.shadows.sm,
     zIndex: theme.zIndex.sticky - 1,
+  };
+
+  const headerContentStyle = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: theme.spacing[4],
+    width: "100%",
+    maxWidth: "1200px",
+    margin: "0 auto",
+    paddingLeft: theme.spacing[6],
+    paddingRight: theme.spacing[6],
+    boxSizing: "border-box",
+
+    "@media (max-width: 768px)": {
+      paddingLeft: theme.spacing[4],
+      paddingRight: theme.spacing[4],
+      gap: theme.spacing[2],
+    },
+  };
+
+  const headerCenterStyle = {
+    flex: 1,
+    textAlign: "center",
+
+    "@media (max-width: 768px)": {
+      flex: "none",
+      textAlign: "left",
+    },
   };
 
   const headerLeftStyle = {
     display: "flex",
     alignItems: "center",
     gap: theme.spacing[4],
+
+    "@media (max-width: 768px)": {
+      gap: theme.spacing[2],
+    },
   };
 
   const headerRightStyle = {
     display: "flex",
     alignItems: "center",
-    gap: theme.spacing[4],
+    gap: theme.spacing[2],
+    flexShrink: 0,
+
+    "@media (max-width: 768px)": {
+      gap: theme.spacing[1],
+    },
   };
 
   const userInfoStyle = {
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing[1],
+    maxWidth: "150px",
+
+    "@media (max-width: 768px)": {
+      display: "none",
+    },
   };
 
   const userNameStyle = {
     fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.primary,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   };
 
   const userEmailStyle = {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.tertiary,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   };
 
   const contentStyle = {
     flex: 1,
     overflowY: "auto",
-    padding: theme.spacing[6],
+    paddingTop: theme.spacing[6],
+    paddingBottom: theme.spacing[6],
+    width: "100%",
+    maxWidth: "1200px",
+    margin: "0 auto",
+    boxSizing: "border-box",
 
     "@media (max-width: 768px)": {
-      padding: theme.spacing[4],
+      paddingTop: theme.spacing[4],
+      paddingBottom: theme.spacing[4],
     },
   };
 
@@ -187,8 +242,6 @@ export function Layout({ children }) {
         : theme.colors.gray[50],
     },
   });
-
-
 
   // ============================================================================
   // MEDIA QUERY HOOK (simple CSS-in-JS approach)
@@ -264,48 +317,54 @@ export function Layout({ children }) {
             </div>
           ))}
         </div>
-
-
       </nav>
 
       {/* MAIN AREA */}
       <div style={mainAreaStyle} data-main-area>
         {/* HEADER */}
         <header style={headerStyle}>
-          <div style={headerLeftStyle}>
-            {/* Hamburger Menu (Mobile) */}
-            <button
-              style={hamburgerStyle}
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              aria-label="Toggle sidebar"
-              title={sidebarOpen ? "Chiudi menu" : "Apri menu"}>
-              ☰
-            </button>
+          <div style={headerContentStyle}>
+            <div style={headerLeftStyle}>
+              {/* Hamburger Menu (Mobile) */}
+              <button
+                style={hamburgerStyle}
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                aria-label="Toggle sidebar"
+                title={sidebarOpen ? "Chiudi menu" : "Apri menu"}>
+                ☰
+              </button>
+            </div>
 
             {/* Header Title */}
-            <h1
-              style={{
-                fontSize: theme.typography.fontSize.xl,
-                fontWeight: theme.typography.fontWeight.semibold,
-                color: theme.colors.text.primary,
-                margin: 0,
-              }}>
-              Treadmill Tracker
-            </h1>
-          </div>
+            <div style={headerCenterStyle}>
+              <h1
+                style={{
+                  fontSize: theme.typography.fontSize.xl,
+                  fontWeight: theme.typography.fontWeight.semibold,
+                  color: theme.colors.text.primary,
+                  margin: 0,
 
-          {/* User Info & Logout */}
-          <div style={headerRightStyle}>
-            {user && (
-              <div style={userInfoStyle}>
-                <div style={userNameStyle}>{user.name}</div>
-                <div style={userEmailStyle}>{user.email}</div>
-              </div>
-            )}
+                  "@media (max-width: 768px)": {
+                    fontSize: theme.typography.fontSize.lg,
+                  },
+                }}>
+                Treadmill Tracker
+              </h1>
+            </div>
 
-            <Button variant="secondary" size="sm" onClick={handleLogout}>
-              Logout
-            </Button>
+            {/* User Info & Logout */}
+            <div style={headerRightStyle}>
+              {user && (
+                <div style={userInfoStyle}>
+                  <div style={userNameStyle}>{user.name}</div>
+                  <div style={userEmailStyle}>{user.email}</div>
+                </div>
+              )}
+
+              <Button variant="secondary" size="sm" onClick={handleLogout}>
+                Logout
+              </Button>
+            </div>
           </div>
         </header>
 

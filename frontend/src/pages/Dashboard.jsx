@@ -60,7 +60,9 @@ export default function Dashboard() {
           day: "2-digit",
         }),
         kcal: parseFloat(s.total_kcal),
-        km: s.distance_km ? parseFloat(s.distance_km) : (s.duration_seconds / 3600) * parseFloat(s.avg_speed_kmh),
+        km: s.distance_km
+          ? parseFloat(s.distance_km)
+          : (s.duration_seconds / 3600) * parseFloat(s.avg_speed_kmh),
         speed: parseFloat(s.avg_speed_kmh),
       }));
   }, [sessions]);
@@ -72,7 +74,11 @@ export default function Dashboard() {
       0,
     );
     const totalDistance = sessions.reduce(
-      (sum, s) => sum + (s.distance_km ? parseFloat(s.distance_km) : (s.duration_seconds / 3600) * parseFloat(s.avg_speed_kmh)),
+      (sum, s) =>
+        sum +
+        (s.distance_km
+          ? parseFloat(s.distance_km)
+          : (s.duration_seconds / 3600) * parseFloat(s.avg_speed_kmh)),
       0,
     );
     const avgSpeed =
@@ -217,41 +223,38 @@ export default function Dashboard() {
   const tablesStyle = {
     backgroundColor: theme.colors.white,
     borderRadius: theme.borderRadius.lg,
+    borderCollapse: "collapse",
     border: `1px solid ${theme.colors.border}`,
     boxShadow: theme.shadows.sm,
+    width: "100%",
     overflow: "hidden",
   };
 
   const tableHeaderStyle = {
-    display: "grid",
-    gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr 1fr",
-    gap: theme.spacing[3],
     padding: theme.spacing[4],
     backgroundColor: theme.colors.gray[50],
-    borderBottom: `1px solid ${theme.colors.border}`,
     fontWeight: theme.typography.fontWeight.semibold,
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
-    textTransform: "uppercase",
     letterSpacing: theme.typography.letterSpacing.wide,
+    textAlign: "center",
+    borderRight: `1px solid ${theme.colors.border}`,
+    borderBottom: `1px solid ${theme.colors.border}`,
+  };
+
+  const tableCellStyle = {
+    padding: theme.spacing[4],
+    textAlign: "center",
+    borderRight: `1px solid ${theme.colors.border}`,
+    borderBottom: `1px solid ${theme.colors.border}`,
   };
 
   const tableRowStyle = {
-    display: "grid",
-    gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr 1fr",
-    gap: theme.spacing[3],
-    padding: theme.spacing[4],
-    borderBottom: `1px solid ${theme.colors.border}`,
-    alignItems: "center",
     transition: `all ${theme.transitions.duration.base} ${theme.transitions.timing.easeInOut}`,
 
     "&:hover": {
       backgroundColor: theme.colors.gray[50],
       boxShadow: `inset 0 0 0 1px ${theme.colors.primary[100]}`,
-    },
-
-    "&:last-child": {
-      borderBottom: "none",
     },
   };
 
@@ -578,69 +581,128 @@ export default function Dashboard() {
 
           {/* Sessions Table */}
           {!loading && filteredSessions.length > 0 && (
-            <div style={tablesStyle}>
-              <div style={tableHeaderStyle}>
-                <div>Data e Ora</div>
-                <div>Durata</div>
-                <div>Distanza</div>
-                <div>Velocità</div>
-                <div>Calorie</div>
-                <div>Azioni</div>
-              </div>
-
-              {filteredSessions.map((session) => (
-                <div key={session.id} style={tableRowStyle}>
-                  <div>
-                    <div
+            <table style={tablesStyle}>
+              <thead>
+                <tr>
+                  {[
+                    "Data e Ora",
+                    "Durata",
+                    "Distanza",
+                    "Velocità",
+                    "Calorie",
+                    "Azioni",
+                  ].map((title, i) => {
+                    const widths = [
+                      "20%",
+                      "13.33%",
+                      "13.33%",
+                      "13.33%",
+                      "13.33%",
+                      "20%",
+                    ];
+                    return (
+                      <th
+                        key={title}
+                        style={{
+                          ...tableHeaderStyle,
+                          width: widths[i],
+                          borderRight:
+                            i < 5 ? `1px solid ${theme.colors.border}` : "none",
+                        }}>
+                        {title}
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSessions.map((session) => (
+                  <tr key={session.id} style={tableRowStyle}>
+                    <td
                       style={{
-                        fontWeight: theme.typography.fontWeight.semibold,
-                        color: theme.colors.text.primary,
+                        ...tableCellStyle,
+                        borderRight: `1px solid ${theme.colors.border}`,
                       }}>
-                      {formatDate(session.created_at)}
-                    </div>
-                  </div>
+                      <div
+                        style={{
+                          fontWeight: theme.typography.fontWeight.semibold,
+                          color: theme.colors.text.primary,
+                        }}>
+                        {formatDate(session.created_at)}
+                      </div>
+                    </td>
 
-                  <div>
-                    <Badge variant="primary" size="sm">
-                      ⏱ {formatDuration(session.duration_seconds)}
-                    </Badge>
-                  </div>
+                    <td
+                      style={{
+                        ...tableCellStyle,
+                        borderRight: `1px solid ${theme.colors.border}`,
+                      }}>
+                      <Badge variant="primary" size="sm">
+                        ⏱ {formatDuration(session.duration_seconds)}
+                      </Badge>
+                    </td>
 
-                  <div>
-                    <Badge variant="secondary" size="sm">
-                      📍 {(session.distance_km ? parseFloat(session.distance_km) : (session.duration_seconds / 3600) * parseFloat(session.avg_speed_kmh)).toFixed(1)} km
-                    </Badge>
-                  </div>
+                    <td
+                      style={{
+                        ...tableCellStyle,
+                        borderRight: `1px solid ${theme.colors.border}`,
+                      }}>
+                      <Badge variant="secondary" size="sm">
+                        📍{" "}
+                        {(session.distance_km
+                          ? parseFloat(session.distance_km)
+                          : (session.duration_seconds / 3600) *
+                            parseFloat(session.avg_speed_kmh)
+                        ).toFixed(1)}{" "}
+                        km
+                      </Badge>
+                    </td>
 
-                  <div>
-                    <Badge variant="warning" size="sm">
-                      ⚡ {parseFloat(session.avg_speed_kmh).toFixed(1)} km/h
-                    </Badge>
-                  </div>
+                    <td
+                      style={{
+                        ...tableCellStyle,
+                        borderRight: `1px solid ${theme.colors.border}`,
+                      }}>
+                      <Badge variant="warning" size="sm">
+                        ⚡ {parseFloat(session.avg_speed_kmh).toFixed(1)} km/h
+                      </Badge>
+                    </td>
 
-                  <div>
-                    <Badge variant="success" size="sm">
-                      🔥 {parseFloat(session.total_kcal).toFixed(0)} kcal
-                    </Badge>
-                  </div>
+                    <td
+                      style={{
+                        ...tableCellStyle,
+                        borderRight: `1px solid ${theme.colors.border}`,
+                      }}>
+                      <Badge variant="success" size="sm">
+                        🔥 {parseFloat(session.total_kcal).toFixed(0)} kcal
+                      </Badge>
+                    </td>
 
-                  <div style={{ display: "flex", gap: theme.spacing[2] }}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate(`/sessions/${session.id}`)}>
-                      Dettaglio
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDelete(session.id)}>
-                      Elimina
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    <td style={tableCellStyle}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: theme.spacing[2],
+                          justifyContent: "center",
+                        }}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/sessions/${session.id}`)}>
+                          Dettaglio
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDelete(session.id)}>
+                          Elimina
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
